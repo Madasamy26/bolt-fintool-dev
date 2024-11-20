@@ -16,6 +16,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useNavStore } from '@/store/useNavStore';
 
 const navItems = [
   { name: "Personal Info", icon: User, progress: 70 },
@@ -27,7 +28,14 @@ const navItems = [
   { name: "Goals", icon: Target, progress: 20 },
 ];
 
-const Sidebar = ({ selectedNav, setSelectedNav }) => {
+const Sidebar = () => {
+  const selectedNav = useNavStore((state) => state.selectedNav);
+  const setSelectedNav = useNavStore((state) => state.setSelectedNav);
+
+  const handleNavClick = (navTitle) => {
+    setSelectedNav(navTitle);
+  };
+
   return (
     <div className="w-64 bg-[#E9F5FE] text-black p-2 h-full overflow-y-auto">
       <div className="flex items-center mb-6 p-2">
@@ -49,7 +57,7 @@ const Sidebar = ({ selectedNav, setSelectedNav }) => {
                   )}
                 >
                   <button
-                    onClick={() => setSelectedNav(item.name)}
+                    onClick={() => handleNavClick(item.name)}
                     className={cn(
                       "flex items-center w-full cursor-pointer",
                       selectedNav === item.name ? "text-white" : "text-black"
