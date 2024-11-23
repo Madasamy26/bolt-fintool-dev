@@ -2,7 +2,6 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { useAuthStore } from '@/store/useAuthStore';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import {
@@ -15,9 +14,13 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import {useAuthStore} from '@/store/useAuthStore'; // Import the auth store
+
 
 const signupSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
+  firstName: z.string().min(2, 'First name must be at least 2 characters'),
+  lastName: z.string().min(2, 'Last name must be at least 2 characters'),
   email: z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
   confirmPassword: z.string(),
@@ -26,19 +29,14 @@ const signupSchema = z.object({
   path: ["confirmPassword"],
 });
 
-const authSelector = (state) => ({
-  signup: state.signup,
-  loginError: state.loginError
-});
-
 export function SignupForm() {
   const navigate = useNavigate();
-  const { signup, loginError } = useAuthStore(authSelector);
-
+  const { signup } = useAuthStore();
   const form = useForm({
     resolver: zodResolver(signupSchema),
     defaultValues: {
-      name: '',
+      firstName: '',
+      lastName: '',
       email: '',
       password: '',
       confirmPassword: '',
@@ -47,11 +45,21 @@ export function SignupForm() {
 
   const onSubmit = async (values) => {
     try {
-      await signup(values.name, values.email, values.password);
-      navigate('/dashboard');
+      // Call the signup API
+     const response =  await signup({
+        firstName: values.firstName,
+        lastName: values.lastName,
+        email: values.email,
+        password: values.password,
+      });
+      // Navigate to the dashboard or another page after successful signup
+      if(response.data.ok){
+        navigate('/verify', { state: { email: values.email } });
+      }
+      
     } catch (error) {
       form.setError('root', {
-        message: 'Signup failed. Please try again.',
+        message: error.response?.data?.message || 'Signup failed. Please try again.',
       });
     }
   };
@@ -67,12 +75,26 @@ export function SignupForm() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
-                name="name"
+                name="firstName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Name</FormLabel>
+                    <FormLabel>First Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter your name" {...field} />
+                      <Input placeholder="Enter your first name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="lastName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Last Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter your last name" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

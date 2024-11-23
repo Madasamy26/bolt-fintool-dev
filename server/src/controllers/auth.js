@@ -5,8 +5,9 @@ import { sendOTPEmail } from '../utils/email.js';
 
 export const register = async (req, res) => {
   try {
-    const { email, password } = req.body;
-
+    
+    const { email, password,firstName,lastName } = req.body;
+    console.log("register",email, password)
     const existingUser = await prisma.user.findUnique({
       where: { email }
     });
@@ -24,7 +25,9 @@ export const register = async (req, res) => {
         email,
         password: hashedPassword,
         otp,
-        otpExpiry
+        otpExpiry,
+        firstName,
+        lastName
       }
     });
 

@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast'; // Import the useToast hook
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -23,8 +24,18 @@ const loginSchema = z.object({
 
 export function LoginForm() {
   const navigate = useNavigate();
-  const login = useAuthStore(state => state.login);
+  const { toast } = useToast();
+  const loginState = useAuthStore(state => state.login);
   const error = useAuthStore(state => state.error);
+  const { login } = useAuthStore();
+
+
+  // useEffect(()=>{
+  //   toast({
+  //     message: 'Login successful!',
+  //     type: 'success', // Show success toast
+  //   });
+  // },[])
 
   const form = useForm({
     resolver: zodResolver(loginSchema),
@@ -36,10 +47,19 @@ export function LoginForm() {
 
   const onSubmit = async (values) => {
     try {
-      await login(values.email, values.password);
+      await login({email:values.email, password:values.password});
+      toast({
+        message: 'Login successful!',
+        type: 'success', // Show success toast
+      });
       navigate('/dashboard');
     } catch (error) {
+
       console.error('Login failed:', error);
+      toast({
+        message: 'Login failed. Please try again.',
+        type: 'error', // Show error toast
+      });
     }
   };
 

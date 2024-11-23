@@ -13,7 +13,7 @@ const transporter = nodemailer.createTransport({
 export const sendOTPEmail = async (email, otp) => {
   try {
     await transporter.sendMail({
-      from: process.env.SMTP_USER,
+      from: process.env.SENDER_MAIL,
       to: email,
       subject: 'Email Verification OTP',
       text: `Your OTP for email verification is: ${otp}`,
