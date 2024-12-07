@@ -98,7 +98,11 @@ export function WorkDetailsForm() {
             </FormItem>
           )}
         />
-        <Button type="submit">Submit</Button>
+        <div className="flex justify-end mt-6">
+          <Button type="submit">
+           Next
+          </Button>
+        </div>
       </form>
     </Form>
   )
