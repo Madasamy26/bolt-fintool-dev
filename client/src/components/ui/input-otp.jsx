@@ -43,6 +43,7 @@ const InputOTPSlot = React.forwardRef(({ index, className, ...props }, ref) => {
     </div>)
   );
 })
+
 InputOTPSlot.displayName = "InputOTPSlot"
 
 const InputOTPSeparator = React.forwardRef(({ ...props }, ref) => (

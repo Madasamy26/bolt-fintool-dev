@@ -18,11 +18,9 @@ export function VerifyOTP() {
 
   const { email } = location.state || {}; // Get the email from the state
 
-  const [otp, setOtp] = useState(["", "", "", "", "", ""]); // State to hold OTP values
+  const [otp, setOtp] = useState(null); // State to hold OTP values
   const [error, setError] = useState(null);
 
-
-  
   const handleChange = (index, value) => {
     const newOtp = [...otp];
     newOtp[index] = value; // Update the specific index with the new value
@@ -31,15 +29,15 @@ export function VerifyOTP() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const otpString = otp.join(''); // Convert the OTP array to a string
+    //const otpString = otp.join('');
 
     try {
       // Call your API to verify the OTP
-      const response = await verifyOtp({ email, otpString });
+      const response = await verifyOtp({ email, otp });
       // Handle successful verification (e.g., log the user in)
       console.log("OTP verified successfully:", response.data);
       //navigate('/dashboard'); // Redirect to the dashboard or another page
-      if (response.data.ok) {
+      if (!response.ok) {
         navigate("/login");
       }
     } catch (err) {
@@ -55,29 +53,32 @@ export function VerifyOTP() {
           An OTP has been sent to {email}. Please enter it below:
         </p>
         <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="flex justify-center space-y-10">
-          <InputOTP maxLength={6}>
-            <InputOTPGroup>
-              {otp.map((value, index) => (
-                <InputOTPSlot
-                  key={index}
-                  index={index}
-                  value={value} // Pass the current value to the slot
-                  onChange={(e) => {console.log(e)}} // Handle change
-                />
-              ))}
-            </InputOTPGroup>
-            
-            
-          </InputOTP>
+          <div className="flex justify-center space-y-10">
+            <InputOTP
+              maxLength={6}
+              onChange={(newValue) => {
+                console.log("New value from InputOTPSlot:", newValue);
+                 setOtp(newValue);
+              }} // Handle change
+            >
+              <InputOTPGroup>
+                <InputOTPSlot index={0} />
+                <InputOTPSlot index={1} />
+                <InputOTPSlot index={2} />
+                <InputOTPSlot index={3} />
+                <InputOTPSlot index={4} />
+                <InputOTPSlot index={5} />
+              </InputOTPGroup>
+            </InputOTP>
 
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+           
           </div>
-         
+
+          {error && <p className="text-red-500 text-sm flex justify-center">{error}</p>}
+
           <Button type="submit" className="w-full bg-[#0C7FDA] text-white">
             Verify OTP
           </Button>
-          
         </form>
       </div>
     </div>

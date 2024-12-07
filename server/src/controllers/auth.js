@@ -5,17 +5,38 @@ import { sendOTPEmail } from '../utils/email.js';
 
 export const register = async (req, res) => {
   try {
-    
-    const { email, password,firstName,lastName } = req.body;
-    console.log("register",email, password)
+    const { email, password, firstName, lastName } = req.body;
+    console.log("register", email, password);
+
     const existingUser = await prisma.user.findUnique({
       where: { email }
     });
 
     if (existingUser) {
-      return res.status(400).json({ message: 'User already exists' });
+      // Check if the user is verified
+      if (!existingUser.verified) {
+        // User exists but is not verified, resend OTP
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+        // Update the user's OTP and expiry in the database
+        await prisma.user.update({
+          where: { email },
+          data: {
+            otp,
+            otpExpiry
+          }
+        });
+
+        await sendOTPEmail(email, otp); // Send the OTP email again
+
+        return res.status(201).json({ message: 'User already registered but not verified. A new OTP has been sent to your email.' });
+      }
+
+      return res.status(400).json({ message: 'User already exists and is verified.' });
     }
 
+    // If the user does not exist, proceed with registration
     const hashedPassword = await bcrypt.hash(password, 10);
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
@@ -31,7 +52,7 @@ export const register = async (req, res) => {
       }
     });
 
-    await sendOTPEmail(email, otp);
+    await sendOTPEmail(email, otp); // Send the OTP email
 
     res.status(201).json({ message: 'User registered. Please verify your email.' });
   } catch (error) {

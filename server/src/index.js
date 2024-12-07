@@ -19,7 +19,7 @@ app.use((req, res, next) => {
 
   res.send = function (body) {
     // Check if the response status is 200
-    if (res.statusCode === 200 || res.statusCode === 201) {
+    if (res.statusCode === 200 || res.statusCode === 201 ) {
       // Parse the body if it's a JSON string
       try {
         const jsonResponse = JSON.parse(body);
